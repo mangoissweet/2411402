@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 		printf("This is negative number.");
 	}	
 	else
-	{-0
+	{
 	printf("This is 0.");
 	}
 	return 0;
