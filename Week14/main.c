@@ -109,7 +109,7 @@ void checkDie(void)
     int i;
     for (i=0;i<N_PLAYER;i++)
     {
-        if (board_getBoardStatus(player_position[i]) == BOARDSTATUS_NOK)
+        if (player_status[i]==PLAYERSTATUS_LIVE&&board_getBoardStatus(player_position[i]) == BOARDSTATUS_NOK)
         {
             printf("%s in pos %i has died!! (coin %i)\n", player_name[i], player_position[i], player_coin[i]);
             player_status[i] = PLAYERSTATUS_DIE;
@@ -121,12 +121,40 @@ void checkDie(void)
 // ----- EX. 6 : game end ------------
 int getAlivePlayer(void)
 {
+   int num_AlivePlayer=0;
+   int i;
    
+   for (i=0;i<N_PLAYER;i++)
+    {
+        if (player_status[i] != PLAYERSTATUS_DIE)
+        {
+            num_AlivePlayer++;
+        }
+    }
+    
+    return num_AlivePlayer;
 }
 
 int getWinner(void)
 {
+    int coins=0;
+    int winner=-1;
+    int i;
+   
+   for (i=0;i<N_PLAYER;i++)
+    {
+        if (player_status[i] != PLAYERSTATUS_DIE)
+        {
+            if(player_coin[i]>coins)
+			{
+				coins=player_coin[i];
+				winner=i;
+			}
+            
+        }
+    }
     
+    return winner;
 }
 // ----- EX. 6 : game end ------------
 
@@ -194,15 +222,29 @@ int main(int argc, const char * argv[]) {
    		player_position[turn]+=dieResult;
    		if(player_position[turn]>N_BOARD)
    		{
-   			printf("Player finished the game");
-   			player_status[turn]=PLAYERSTATUS_LIVE;
+   			printf("Player finished the game!\n");
+   			player_status[turn]=PLAYERSTATUS_END;
 		}
 		board_printBoardStatus();
         //step 2-4. coin
-    
+        
+        int gain = board_getBoardCoin(player_position[turn]);
+        player_coin[turn]+=gain;
+        if(gain>0)
+        {
+        	printf("player %s got %d coins!\n",player_name[turn] ,gain);
+		}
         
         //step 2-5. end process
-    
+        turn = (turn + 1)%N_PLAYER;
+        
+        if(turn==0)
+        {
+        	int shark_pos=board_stepShark();
+        	printf("Shark moved to %i\n",shark_pos);
+        	checkDie();
+		}
+    	
 // ----- EX. 6 : game end ------------
     } while(game_end() == 0);
     
